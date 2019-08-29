@@ -11,40 +11,35 @@ html, body {
   width: 100%;
 }
 
-.home .container {
+.container {
   align-items: center;
   display: flex;
   height: 100%;
   width: 100%;
 }
 
-.home .text {
+.text {
   margin: 0 auto;
 }
 
-.home h1 {
+h1 {
   color: #333;
   font-size: 32px;
 }
 
-.home .lemon {
+.lemon {
   display: block;
   font-size: 68px;
   text-align: center;
 }
 
-.home p,
-.home a {
+p, a {
   color: #666;
   font-size: 14px;
   text-align: center;
   text-decoration: none;
 }
 
-.home a:hover {
+a:hover {
   text-decoration: underline;
-}
-
-.swagger .swagger-ui .models {
-  display: none;
 }
