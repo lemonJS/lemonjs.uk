@@ -1,0 +1,50 @@
+* {
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+}
+
+html, body {
+  background: #f9f9f9;
+  height: 100%;
+  margin: 0;
+  width: 100%;
+}
+
+.home .container {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.home .text {
+  margin: 0 auto;
+}
+
+.home h1 {
+  color: #333;
+  font-size: 32px;
+}
+
+.home .lemon {
+  display: block;
+  font-size: 68px;
+  text-align: center;
+}
+
+.home p,
+.home a {
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  text-decoration: none;
+}
+
+.home a:hover {
+  text-decoration: underline;
+}
+
+.swagger .swagger-ui .models {
+  display: none;
+}
