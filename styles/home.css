@@ -25,6 +25,7 @@ html, body {
 h1 {
   color: #333;
   font-size: 32px;
+  text-align: center;
 }
 
 .lemon {
