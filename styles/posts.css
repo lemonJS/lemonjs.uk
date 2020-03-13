@@ -1,0 +1,93 @@
+
+header {
+  background: white;
+  border-bottom: 1px solid #ccc;
+  padding: 1rem;
+}
+
+header .lemon {
+  font-size: 2rem;
+}
+
+header a:hover {
+  text-decoration: none;
+}
+
+footer {
+  background: white;
+  border-top: 1px solid #ccc;
+  padding: 1rem;
+}
+
+footer p {
+  margin: 0;
+  text-align: center;
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.posts {
+  padding: 0;
+}
+
+.posts li {
+  border-bottom: 1px solid #ccc;
+  list-style: none;
+  padding: 1.5rem 0;
+}
+
+.posts li a {
+  display: block;
+  font-size: 1.25rem;
+  margin: 0 0 .5rem 0;
+}
+
+.tag {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: .25rem;
+  color: #666;
+  font-size: .875rem;
+  margin: 0 .25rem .25rem 0;
+  padding: .25rem .5rem;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+}
+
+pre, pre * {
+  font-size: 1rem;
+  font-family: monospace;
+}
+
+code {
+  border-radius: .25rem;
+  display: block;
+  margin-bottom: .5rem;
+  padding: 1.5rem !important;
+}
+
+code.inline {
+  color: #880000;
+  display: inline-block;
+  font-family: monospace;
+  font-size: 1.3rem;
+  margin-bottom: 0;
+  padding: 0 !important;
+}
+
+article ul {
+  padding: 0 0 0 1.25rem;
+}
+
+article li {
+  color: #555;
+  font-size: 1rem;
+  margin-bottom: .5rem;
+}
