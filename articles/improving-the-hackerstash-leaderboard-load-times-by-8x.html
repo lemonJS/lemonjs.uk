@@ -3,7 +3,7 @@
   <head>
     <title>lemonjs / articles / Improving the HackerStash leaderboard load times by 8x</title>
     <meta name="description" content="Just another developer's blog">
-    <meta name="keywords" content="Blog, TypeScript, Python, Runing, Coffee">
+    <meta name="keywords" content="Blog, TypeScript, Python, Running, Coffee">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="Lewis Monteith">
     <meta property="og:title" content="Improving the HackerStash leaderboard load times by 8x">
@@ -49,34 +49,34 @@
 
             <p>The class looks a little something like this (simplified for your viewing pleaseure, of course):</p>
 
-            <pre><code>class Leaderboard:    
-    key: str = key()    
+              <pre><code class="hljs python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Leaderboard</span>:</span>
+    key: <span class="hljs-built_in">str</span> = key()
 
-    def __init__(self, project):        
-        self.project = project    
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span>(<span class="hljs-params">self, project</span>):</span>
+        self.project = project
 
-    @classmethod    
-    def order(cls, reverse=False) -> list[int]:        
-        order = redis.zrevrange(cls.key, 0, -1)        
-        return [int(x.decode('utf-8')) for x in order]    
+<span class="hljs-meta">    @classmethod    </span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">order</span>(<span class="hljs-params">cls, reverse=<span class="hljs-literal">False</span></span>) -&gt; list[int]:</span>
+        order = redis.zrevrange(cls.key, <span class="hljs-number">0</span>, -<span class="hljs-number">1</span>)
+        <span class="hljs-keyword">return</span> [<span class="hljs-built_in">int</span>(x.decode(<span class="hljs-string">'utf-8'</span>)) <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> order]
 
-    @classmethod    
-    def remaining_days(cls) -> str:        
-        return arrow.utcnow().ceil('month').humanize(only_distance=True)    
+<span class="hljs-meta">    @classmethod    </span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">remaining_days</span>(<span class="hljs-params">cls</span>) -&gt; str:</span>
+        <span class="hljs-keyword">return</span> arrow.utcnow().ceil(<span class="hljs-string">'month'</span>).humanize(only_distance=<span class="hljs-literal">True</span>)
 
-    @property    
-    def position(self) -> int:        
-        rank = redis.zrevrank(self.key, self.project.id)        
-        return rank + 1 if rank is not None else -1    
+<span class="hljs-meta">    @property    </span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">position</span>(<span class="hljs-params">self</span>) -&gt; int:</span>
+        rank = redis.zrevrank(self.key, self.project.<span class="hljs-built_in">id</span>)
+        <span class="hljs-keyword">return</span> rank + <span class="hljs-number">1</span> <span class="hljs-keyword">if</span> rank <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">else</span> -<span class="hljs-number">1</span>
 
-    @property    
-    def score(self) -> int:        
-        score = redis.zscore(self.key, self.project.id) or 0.0        
-        return int(score)    
+<span class="hljs-meta">    @property    </span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">score</span>(<span class="hljs-params">self</span>) -&gt; int:</span>
+        score = redis.zscore(self.key, self.project.<span class="hljs-built_in">id</span>) <span class="hljs-keyword">or</span> <span class="hljs-number">0.0</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">int</span>(score)
 
-    def update(self, amount: int) -> int:        
-        score = redis.zincrby(self.key, amount, self.project.id)        
-        return int(score)</code></pre>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">update</span>(<span class="hljs-params">self, amount: <span class="hljs-built_in">int</span></span>) -&gt; int:</span>
+        score = redis.zincrby(self.key, amount, self.project.<span class="hljs-built_in">id</span>)
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">int</span>(score)</code></pre>
               <p>Let's break this down!</p>
 
               <p>Leaderboard#order</p>
@@ -94,39 +94,35 @@
               <p>Leaderboard#update</p>
               <p>This uses the Redis ZINCRBY method to increment the projects score. I call this whenever an action occurs like a vote, a simplified example looks like this:</p>
 
-              <pre><code>def vote(self, direction: str) -> None:    
-    score = 5 if direction == 'up' else -5    
-    vote = Vote(type='post', score=score)    
+              <pre><code class="hljs python"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">vote</span>(<span class="hljs-params">self, direction: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-keyword">None</span>:</span>
+    score = <span class="hljs-number">5</span> <span class="hljs-keyword">if</span> direction == <span class="hljs-string">'up'</span> <span class="hljs-keyword">else</span> -<span class="hljs-number">5</span>
+    vote = Vote(<span class="hljs-built_in">type</span>=<span class="hljs-string">'post'</span>, score=score)
     Leaderboard(self.project).update(score)    
     db.session.commit()</code></pre>
 
               <p>When fetching the leaderboard, I can first get the order and use it to work out which projects to fetch from the database, like so:</p>
 
-              <pre><code># Fetch the page from the query string, default to the first page
-page = request.args.get('page', 1, type=int)
+              <pre><code class="hljs python"><span class="hljs-comment"># Fetch the page from the query string, default to the first page</span>
+page = request.args.get(<span class="hljs-string">'page'</span>, <span class="hljs-number">1</span>, <span class="hljs-built_in">type</span>=<span class="hljs-built_in">int</span>)
 
-# Get a list of ids in their correct order from the above class
+<span class="hljs-comment"># Get a list of ids in their correct order from the above class</span>
 order = Leaderboard.order()
 
-# Create an SQL expression using those orders
-order_expr = func.array_position(order, Project.id)
+<span class="hljs-comment"># Create an SQL expression using those orders</span>
+order_expr = func.array_position(order, Project.<span class="hljs-built_in">id</span>)
 
-# Get only the projects that qualify for the leaderboard, and order
-# them based on the order expression
-projects = Project.query\    
-    .filter(Project.id.in_(order))\    
-    .filter(Project.published == True)\    
-    .order_by(order_expr)\    
-    .paginate(page, 25, False)</code></pre>
+<span class="hljs-comment"># Get only the projects that qualify for the leaderboard, and order</span>
+<span class="hljs-comment"># them based on the order expression</span>
+projects = Project.query\
+    .<span class="hljs-built_in">filter</span>(Project.<span class="hljs-built_in">id</span>.in_(order))\
+    .<span class="hljs-built_in">filter</span>(Project.published == <span class="hljs-literal">True</span>)\
+    .order_by(order_expr)\
+    .paginate(page, <span class="hljs-number">25</span>, <span class="hljs-literal">False</span>)</code></pre>
               <p>Overall, some nice gains in performance and we're left with a more future proof solution</p>
               
               <p>I wrote about this over at <a href="https://hackerstash.com/posts/how-we-improved-the-leaderboard-load-times-by-8x" target="_blank" rel="noreferrer nofollow">HackerStash</a>, you can check the speed gains out for yourself</p>
           </article>
       </main>
     </div>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js" crossorigin="anonymous"></script>
-    <script type="text/javascript">
-        hljs.highlightAll();
-    </script>
   </body>
 </html>

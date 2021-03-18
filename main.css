@@ -75,6 +75,14 @@ a:hover {
   margin: 0;
 }
 
+article a {
+  color: #e1b12c;
+}
+
+article a:hover {
+  text-decoration: underline;
+}
+
 article p {
   font-size: 16px;
   line-height: 24px;
@@ -100,6 +108,13 @@ article pre {
   margin: 0 0 2rem 0;
   padding: 2rem;
   white-space: pre-wrap;
+}
+
+article code.inline {
+  background: #353b48;
+  border-radius: .25rem;
+  color: #c678dd;
+  padding: .15rem .25rem;
 }
 
 .hljs {

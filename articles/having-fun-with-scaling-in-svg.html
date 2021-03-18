@@ -3,7 +3,7 @@
   <head>
     <title>lemonjs / articles / Having fun with scaling in SVG</title>
     <meta name="description" content="Just another developer's blog">
-    <meta name="keywords" content="Blog, TypeScript, Python, Runing, Coffee">
+    <meta name="keywords" content="Blog, TypeScript, Python, Running, Coffee">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="Lewis Monteith">
     <meta property="og:title" content="Having fun with scaling in SVG">
@@ -40,36 +40,36 @@
 
             <p>By far my largest challenge was with scaling elements. Most SVG elements do not have a width and height like they go in the DOM or in a canvas. As a result, elements paths must either be adjusted or scaled. I picked the latter for my experiment. When the user clicked and dragged on the 9-point grid, the following functions were called:</p>
 
-            <pre><code>private handleMouseMove = (
+              <pre><code class="language-typescript hljs"><span class="hljs-keyword">private</span> handleMouseMove = (
     event: MouseEvent
-): void => {
-    if (this.state.pressed) {
-        const transform = calculateTransform({
-            box: this.state.box,
-            client: [event.clientX, event.clientY],
-            offset: this.state.offset,
-            scale: this.state.scale,
-            shift: this.state.shift,
-            position: this.props.location,
+): <span class="hljs-function"><span class="hljs-params">void</span> =&gt;</span> {
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">this</span>.state.pressed) {
+        <span class="hljs-keyword">const</span> transform = calculateTransform({
+            <span class="hljs-attr">box</span>: <span class="hljs-built_in">this</span>.state.box,
+            <span class="hljs-attr">client</span>: [event.clientX, event.clientY],
+            <span class="hljs-attr">offset</span>: <span class="hljs-built_in">this</span>.state.offset,
+            <span class="hljs-attr">scale</span>: <span class="hljs-built_in">this</span>.state.scale,
+            <span class="hljs-attr">shift</span>: <span class="hljs-built_in">this</span>.state.shift,
+            <span class="hljs-attr">position</span>: <span class="hljs-built_in">this</span>.props.location,
         });
-        this.props.handleTransform(transform);
+        <span class="hljs-built_in">this</span>.props.handleTransform(transform);
     }
 };
 
-private handkeMouseUp = (): void => {
-    this.setState({ pressed: false });
+<span class="hljs-keyword">private</span> handkeMouseUp = (): <span class="hljs-function"><span class="hljs-params">void</span> =&gt;</span> {
+    <span class="hljs-built_in">this</span>.setState({ <span class="hljs-attr">pressed</span>: <span class="hljs-literal">false</span> });
 };
 
-private handleMouseDown = (
+<span class="hljs-keyword">private</span> handleMouseDown = (
     event: React.MouseEvent&lt;SVGEllipseElement&gt;
-): void => {
-    const box = this.parent.getBBox();
+): <span class="hljs-function"><span class="hljs-params">void</span> =&gt;</span> {
+    <span class="hljs-keyword">const</span> box = <span class="hljs-built_in">this</span>.parent.getBBox();
 
-    this.setState({
-        box: [box.width, box.height],
-        offset: [event.clientX, event.clientY],
-        pressed: true,
-        scale: clone(this.props.transform.s)
+    <span class="hljs-built_in">this</span>.setState({
+        <span class="hljs-attr">box</span>: [box.width, box.height],
+        <span class="hljs-attr">offset</span>: [event.clientX, event.clientY],
+        <span class="hljs-attr">pressed</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">scale</span>: clone(<span class="hljs-built_in">this</span>.props.transform.s)
     });
 };</code></pre>
             <p>All of this is unfotunately necessary, as an element may or may not have a scale applied before you drag, so both the offset of your drag and the scale factor need to be taken into account. All of this is made more challenging when you allow the user to zoom the editor in!</p>
@@ -77,88 +77,84 @@ private handleMouseDown = (
             <p>Once you know the start position, the end position, the original coordinates, the original scale amount, whether or not the user is holding the shift key and the elements position from the top left of the SVG, you can try and figure out how much you should adjust the scale. Remember, we're not simply adjusting the width/height, that would be too easy! We need to calculate how much to adjust the X and Y scale of the element.</p>
 
             <p>Prepare yourself for a function that should never see the light of day!</p>
-            <pre><code>const MIN_SIZE = 32;
+              <pre><code class="language-typescript hljs"><span class="hljs-keyword">const</span> MIN_SIZE = <span class="hljs-number">32</span>;
 
-export const calculateTransform = (
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> calculateTransform = (
     payload: TransformPayload
-): Partial&lt;Transform&gt; => {
-    const { position, shift } = payload;
+): Partial&lt;Transform&gt; =&gt; {
+    <span class="hljs-keyword">const</span> { position, shift } = payload;
 
-    const [clientX, clientY] = payload.client;
-    const [width, height] = payload.box;
-    const [offsetX, offsetY] = payload.offset;
-    const [scaleX, scaleY] = payload.scale;
+    <span class="hljs-keyword">const</span> [clientX, clientY] = payload.client;
+    <span class="hljs-keyword">const</span> [width, height] = payload.box;
+    <span class="hljs-keyword">const</span> [offsetX, offsetY] = payload.offset;
+    <span class="hljs-keyword">const</span> [scaleX, scaleY] = payload.scale;
 
-    const out: Partial&lt;Transform&gt; = { s: [1, 1] };
+    <span class="hljs-keyword">const</span> out: Partial&lt;Transform&gt; = { <span class="hljs-attr">s</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>] };
 
-    let h = 0;
-    let w = 0;
-    let x: number | undefined;
-    let y: number | undefined;
+    <span class="hljs-keyword">let</span> h = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">let</span> w = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">let</span> x: <span class="hljs-built_in">number</span> | <span class="hljs-literal">undefined</span>;
+    <span class="hljs-keyword">let</span> y: <span class="hljs-built_in">number</span> | <span class="hljs-literal">undefined</span>;
 
-    switch (position) {
-        case 'top-left':
+    <span class="hljs-keyword">switch</span> (position) {
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'top-left'</span>:
             x = offsetX + clientX - offsetX;
             y = offsetY + clientY - offsetY;
             w = (width * scaleX) - (clientX - offsetX);
             h = (height * scaleY) - (clientY - offsetY);
-            break;
-        case 'top-center':
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'top-center'</span>:
             y = offsetY + clientY - offsetY;
             w = width * scaleX;
             h = (height * scaleY) - (clientY - offsetY);
-            break;
-        case 'top-right':
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'top-right'</span>:
             w = width + (clientX - offsetX);
             h = (height * scaleY) - (clientY - offsetY);
             y = offsetY + clientY - offsetY;
-            break;
-        case 'center-right':
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'center-right'</span>:
             w = (width * scaleX) + (clientX - offsetX);
             h = height * scaleY;
-            break;
-        case 'bottom-right':
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'bottom-right'</span>:
             w = (width * scaleX) + (clientX - offsetX);
             h = (height * scaleY) + (clientY - offsetY);
-            break;
-        case 'bottom-center':
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'bottom-center'</span>:
             w = width * scaleX;
             h = (height * scaleY) + (clientY - offsetY);
-            break;
-        case 'bottom-left':
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'bottom-left'</span>:
             w = (width * scaleX) - (clientX - offsetX);
             h = (height * scaleY) + (clientY - offsetY);
             x = offsetX + clientX - offsetX;
-            break;
-        case 'center-left':
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'center-left'</span>:
             w = (width * scaleX) - (clientX - offsetX);
             h = height * scaleY;
             x = offsetX + clientX - offsetX;
-            break;
+            <span class="hljs-keyword">break</span>;
     }
 
     out.s = [
-        Math.max(w, MIN_SIZE) / width,
-        Math.max(h, MIN_SIZE) / height
+        <span class="hljs-built_in">Math</span>.max(w, MIN_SIZE) / width,
+        <span class="hljs-built_in">Math</span>.max(h, MIN_SIZE) / height
     ];
 
-    if (x && w >= MIN_SIZE) out.x = x;
-    if (y && h >= MIN_SIZE) out.y = y;
+    <span class="hljs-keyword">if</span> (x &amp;&amp; w &gt;= MIN_SIZE) out.x = x;
+    <span class="hljs-keyword">if</span> (y &amp;&amp; h &gt;= MIN_SIZE) out.y = y;
 
-    if (shift) {
-        const aspect = width / height;
-        out.s[1] = (Math.max(w, MIN_SIZE) / aspect) / height;
+    <span class="hljs-keyword">if</span> (shift) {
+        <span class="hljs-keyword">const</span> aspect = width / height;
+        out.s[<span class="hljs-number">1</span>] = (<span class="hljs-built_in">Math</span>.max(w, MIN_SIZE) / aspect) / height;
     }
 
-    return out;
+    <span class="hljs-keyword">return</span> out;
 };</code></pre>
             <p>This project has been parked, but it was a really fun exersize!</p>
           </article>
       </main>
     </div>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js" crossorigin="anonymous"></script>
-    <script type="text/javascript">
-        hljs.highlightAll();
-    </script>
   </body>
 </html>

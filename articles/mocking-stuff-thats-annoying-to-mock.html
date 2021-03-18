@@ -3,7 +3,7 @@
   <head>
     <title>lemonjs / articles / Mocking stuff that's annoying to mock</title>
     <meta name="description" content="Just another developer's blog">
-    <meta name="keywords" content="Blog, TypeScript, Python, Runing, Coffee">
+    <meta name="keywords" content="Blog, TypeScript, Python, Running, Coffee">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="Lewis Monteith">
     <meta property="og:title" content="Mocking stuff that's annoying to mock">
@@ -37,104 +37,100 @@
 
             <p>Here's how I imagine our code would be structured:</p>
 
-            <pre><code>import Redis from 'redis';
+              <pre><code class="hljs typescript"><span class="hljs-keyword">import</span> Redis <span class="hljs-keyword">from</span> <span class="hljs-string">'redis'</span>;
 
-const redis = new Redis();
+<span class="hljs-keyword">const</span> redis = <span class="hljs-keyword">new</span> Redis();
 
-export const getLeaderboardEntry = async (
-    id: string
-): Promise&lt;string | null&gt; => {
-    return redis.get(id);
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> getLeaderboardEntry = <span class="hljs-keyword">async</span> (
+    id: <span class="hljs-built_in">string</span>
+): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">string</span> | <span class="hljs-literal">null</span>&gt; =&gt; {
+    <span class="hljs-keyword">return</span> redis.get(id);
 };
 
-export const deleteLeaderboardEntry = async (
-    id: string
-): Promise&lt;void&gt; => {
-    await redis.del(id);
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> deleteLeaderboardEntry = <span class="hljs-keyword">async</span> (
+    id: <span class="hljs-built_in">string</span>
+): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; =&gt; {
+    <span class="hljs-keyword">await</span> redis.del(id);
 };</code></pre>
 
             <p>A bunch of exported functions all utlising the global redis instance. On the face of it, this code is okay, however it has it's downsides. Firstly, getting an item from the leaderboard is now tightly coupled both to Redis, and to the specific npm package for talking to Redis. Secondly, we need to mock the global scope.</p>
 
             <p>Without going head first into a DI framework, we could easilly rewrite this code as a class, where we take a CacheClient argument, like so:</p>
 
-            <pre><code>export class Leaderboard {
-  private readonly client: CacheClient;
+            <pre><code class="hljs typescript"><span class="hljs-keyword">export</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Leaderboard</span> </span>{
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> client: CacheClient;
 
-  public constructor(client: CacheClient) {
-      this.client = client;
+  <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-title">constructor</span>(<span class="hljs-params">client: CacheClient</span>)</span> {
+      <span class="hljs-built_in">this</span>.client = client;
   }
-  
-  public async get(id: string): Promise&lt;string | null&gt; {
-      this.client.get(id);
+
+  <span class="hljs-keyword">public</span> <span class="hljs-keyword">async</span> get(id: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">string</span> | <span class="hljs-literal">null</span>&gt; {
+      <span class="hljs-built_in">this</span>.client.get(id);
   }
- 
-  public async delete(id: string): Promise&lt;void&gt; {
-      this.client.del(id);
+
+  <span class="hljs-keyword">public</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">delete</span>(id: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
+      <span class="hljs-built_in">this</span>.client.del(id);
   }
 }</code></pre>
             <p>With a small change, we've decoupled the leaderboard from Redis, from ioredis, and made it possible to test without mocking the global scope, nice! A simple test can now be written to make sure the client is called correctly:</p>
 
-            <pre><code>describe('Leaderboard', () => {
-  describe('.get', () => {
-      const client = { get: jest.fn(() => 'hello!') };
+              <pre><code class="language-typescript hljs">describe(<span class="hljs-string">'Leaderboard'</span>, <span class="hljs-function">() =&gt;</span> {
+  describe(<span class="hljs-string">'.get'</span>, <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-keyword">const</span> client = { <span class="hljs-attr">get</span>: jest.fn(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">'hello!'</span>) };
 
-      it('calls the client', async () => {
-          const leaderboard = new Leaderboard(client);
-          await leaderboard.get('id');
-          expect(client.get).toHaveBeenCalledWith('id');
+      it(<span class="hljs-string">'calls the client'</span>, <span class="hljs-keyword">async</span> () =&gt; {
+          <span class="hljs-keyword">const</span> leaderboard = <span class="hljs-keyword">new</span> Leaderboard(client);
+          <span class="hljs-keyword">await</span> leaderboard.get(<span class="hljs-string">'id'</span>);
+          expect(client.get).toHaveBeenCalledWith(<span class="hljs-string">'id'</span>);
       });
 
-      it('returns the key', async () => {
-          const leaderboard = new Leaderboard(client);
-          const result = await leaderboard.get('id');
-          expect(result).toEqual('hello');
+      it(<span class="hljs-string">'returns the key'</span>, <span class="hljs-keyword">async</span> () =&gt; {
+          <span class="hljs-keyword">const</span> leaderboard = <span class="hljs-keyword">new</span> Leaderboard(client);
+          <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> leaderboard.get(<span class="hljs-string">'id'</span>);
+          expect(result).toEqual(<span class="hljs-string">'hello'</span>);
       });
   });
 });</code></pre>
             <p>Another option would be to use a Higher Order Function to inject the CacheClient, we could leverage all the benefits of the above class, but retain the 'just a bunch of exported functions' approach. Here's a basic wrapper:</p>
-            <pre><code>import Redis from 'ioredis';
+              <pre><code class="language-typescript hljs"><span class="hljs-keyword">import</span> Redis <span class="hljs-keyword">from</span> <span class="hljs-string">'ioredis'</span>;
 
-const redis = new Redis();
+<span class="hljs-keyword">const</span> redis = <span class="hljs-keyword">new</span> Redis();
 
-const withCacheClient = &lt;T extends Function, G&gt;(
-    func: T, 
+<span class="hljs-keyword">const</span> withCacheClient = &lt;T extends Function, G&gt;(
+    func: T,
     ...args: Array&lt;T&gt;
-) => func(x, ...args);</pre>
+) =&gt; func(x, ...args);</code></pre>
             <p>If we modify the code from the first example to use this HOF, it would look like this:</p>
-            <pre>export const getLeaderboardEntry = async (
-    client: CacheClient, 
-    id: string
-): Promise&lt;string | null&gt; => {
-    return client.get(id);
+              <pre><code class="hljs typescript"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> getLeaderboardEntry = <span class="hljs-keyword">async</span> (
+    client: CacheClient,
+    <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>
+): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">string</span> | <span class="hljs-literal">null</span>&gt; =&gt; {
+    <span class="hljs-keyword">return</span> client.get(id);
 };
 
-export const deleteLeaderboardEntry = async (
-    client: CacheClient, 
-    id: string
-): Promise&lt;void&gt; => {
-    await client.del(id);
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> deleteLeaderboardEntry = <span class="hljs-keyword">async</span> (
+    client: CacheClient,
+    <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>
+): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; =&gt; {
+    <span class="hljs-keyword">await</span> client.del(id);
 };
 
-// Example usage
-async withCacheClient(getLeaderboardEntry, 'id');
-async withCacheClient(deleteLeaderboardEntry, 'id');
+<span class="hljs-comment">// Example usage</span>
+<span class="hljs-keyword">async</span> withCacheClient(getLeaderboardEntry, <span class="hljs-string">'id'</span>);
+<span class="hljs-keyword">async</span> withCacheClient(deleteLeaderboardEntry, <span class="hljs-string">'id'</span>);
 </code></pre>
             <p>Once again, our application logic can be tested without the need to mock the global Redis instance, as we can pass a mocked version in ourselves:</p>
 
-            <pre><code>describe('getLeaderboardEntry', () => {
-    const client = { get: jest.fn(() => 'Hello') };
-                  
-    it('returns the key', () => {
-        const result = getLeaderboardEntry(redis, 'id');  
-        expect(result).toEqual('hello');
+              <pre><code class="language-typescript hljs">describe(<span class="hljs-string">'getLeaderboardEntry'</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> client = { <span class="hljs-attr">get</span>: jest.fn(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">'Hello'</span>) };
+
+    it(<span class="hljs-string">'returns the key'</span>, <span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-keyword">const</span> result = getLeaderboardEntry(redis, <span class="hljs-string">'id'</span>);
+        expect(result).toEqual(<span class="hljs-string">'hello'</span>);
     });
 });</code></pre>
           </article>
       </main>
     </div>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js" crossorigin="anonymous"></script>
-    <script type="text/javascript">
-        hljs.highlightAll();
-    </script>
   </body>
 </html>
