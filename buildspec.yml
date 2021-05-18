@@ -3,5 +3,5 @@ version: 0.2
 phases:
   post_build:
     commands:
-      - aws s3 sync ./ s3://lemonjs.uk --delete
-      - aws cloudfront create-invalidation --distribution-id EFFM08EAF103G --paths "/*" --exclude ".git*" --exclude "buildspec.yml"
+      - aws s3 sync ./ s3://lemonjs.uk --delete  --exclude ".git*" --exclude "buildspec.yml"
+      - aws cloudfront create-invalidation --distribution-id EFFM08EAF103G --paths "/*"
