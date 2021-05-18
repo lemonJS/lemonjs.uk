@@ -33,6 +33,9 @@
         <main>
             <article>
                 <h1>Building a Serverless-first framework</h1>
+                <div class="tags">
+                  <span>TypeScript</span><span>Serverless</span>
+                </div>
                 <p>Vendor lock-in is generally a bad idea, but I've found that I'm using Serverless/AWS/TypeScript for most APIs. Whenever the API requires GraphQL, I use <a href="https://www.apollographql.com/docs/apollo-server/v1/servers/lambda/" target="_blank" rel="nofollow noreferrer">apollo-server-lambda</a> (which is fantastic), however REST APIs tend to need a lot of boilerplate. One option is to use Express with <a href="https://github.com/mikestaub/serverless-express" target="_blank" rel="nofollow noreferrer">serverless-express</a>, however, I'd like to explore the idea of building a Serverless-first framework.</p>
                 <p>If we create a very basic REST handler with Serverless, it looks something like this:</p>
                 <pre><code class="hljs typescript">

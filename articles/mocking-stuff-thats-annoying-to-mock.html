@@ -33,6 +33,9 @@
         <main>
             <article>
                 <h1>Mocking stuff that's annoying to mock</h1>
+                <div class="tags">
+                  <span>TypeScript</span><span>Testing</span><span>Redis</span>
+                </div>
                 <p>I recently attended a workshop where a coworker demoed a Dependency Injection framework he'd written. He pitched it as a way to reduce complexity in their Serverless Python application, and as a way to simplify the unit testing. It got me thinking about how mocking the global scope of some of our dependencies was a huge PITA and that we could leverage some DI.</p>
                 <p>We've recently started moving a leaderboard from DynamoDB to Redis and we need a way to mock some of the calls to Redis. One option would be to use <a href="https://www.npmjs.com/package/ioredis-mock" target="_blank" rel="nofollow noreferrer">ioredis-mock</a>, a drop in library to stub out the entirety of Redis. Yarn installing a whole package just to write some tests seemed like the most javascripty thing ever!</p>
                 <p>Here's how I imagine our code would be structured:</p>

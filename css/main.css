@@ -53,6 +53,20 @@ a:hover {
   margin: 0 0 1rem 0;
 }
 
+.tags {
+  font-size: 14px;
+  margin-top: .5rem;
+}
+
+.tags span {
+  background: #282c34;
+  border-radius: .25rem;
+  color: #c678dd;
+  display: inline-block;
+  margin-right: .5rem;
+  padding: .25rem;
+}
+
 .articles {
   margin: 0;
   padding: 0;
@@ -77,6 +91,10 @@ a:hover {
   font-weight: 500;
   line-height: 32px;
   margin: 0;
+}
+
+article h1 {
+  margin-bottom: 1rem;
 }
 
 article a {
@@ -123,4 +141,8 @@ article code.inline {
   color: #c678dd;
   line-height: 20px;
   padding: .15rem .25rem;
+}
+
+article .tags {
+  margin-bottom: 2rem;
 }

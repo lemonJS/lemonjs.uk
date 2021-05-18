@@ -33,13 +33,16 @@
         <main>
             <article>
                 <h1>RSpec makes testing truly enjoyable</h1>
+                <div class="tags">
+                  <span>Ruby</span><span>Testing</span>
+                </div>
                 <h3>A <i>little</i> backstory</h3>
                 <p>My first experience writing tests was with Mocha and Chai in Node v0.10. At the time there were two phrases that every non-dev in the company was using, the first was "mobile first" and the second was "TDD". I'm not sure they really understood what they were, but it was all the rage and they wanted it.</p>
                 <p>Testing at the time was always an afterthought - I would make some changes, refresh the browser and have a look for myself. Then once I knew it worked, I would go and verify my claim with some tests and call it a day.</p>
                 <p>Mocha and Chai did the job in this regard, but it was never a fun job. You'd need to install some plugins for Chai to play nicely with Promises, then another plugin so that Mocha could report properly in Jenkins. You'd need to configure Superagent so that you could run queries against your Express routes. You'd need to write a function to create and teardown a database when the tests run. You need Sinon to stub stuff. It was exhausting.</p>
                 <p>Fast forward a few years and now we're working with TypeScript, Babel, React etc, and there are plugins upon plugins to get all of this to work. The cold start for the test runner becomes unbearable, and any updates are likely to cause the entire thing to collapse.</p>
                 <p>Jest came along and fixed about 75% of the problems. It had less boilerplate, a lot less plugins, ran concurrently, but I still didn't enjoy it.</p>
-                <h2>Oh, Ruby</h2>
+                <h3>Oh, Ruby</h3>
                 <p>My first experience with Ruby was in 2019, or about 10 years after it was "cool". I initially hated Ruby (funny story, I love it now), but working with RSpec was a huge, huge eye opener to me. Most of the buzz I'd heard about 5 years prior started to make sense, and for the first time in my development career I actually started to enjoy writing tests.</p>
                 <p>How much of this enjoyment comes from RSpec directly, and how much of it is due to Rails or Ruby is not that clear to me, but I suspect it's a combination of the three. Finally, tests were seperated logically, and read like they were telling a story.</p>
                 <p>The devs on that team absolutely adored testing, and I have a feeling that their enthusiasm and knowledge helped change my perspective as much as the framework did. But I'll focus on the code here.</p>
