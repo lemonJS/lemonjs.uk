@@ -35,17 +35,17 @@
                 <h1>Building a Serverless-first framework</h1>
                 <p>Vendor lock-in is generally a bad idea, but I've found that I'm using Serverless/AWS/TypeScript for most APIs. Whenever the API requires GraphQL, I use <a href="https://www.apollographql.com/docs/apollo-server/v1/servers/lambda/" target="_blank" rel="nofollow noreferrer">apollo-server-lambda</a> (which is fantastic), however REST APIs tend to need a lot of boilerplate. One option is to use Express with <a href="https://github.com/mikestaub/serverless-express" target="_blank" rel="nofollow noreferrer">serverless-express</a>, however, I'd like to explore the idea of building a Serverless-first framework.</p>
                 <p>If we create a very basic REST handler with Serverless, it looks something like this:</p>
-                <pre><code>
+                <pre><code class="hljs typescript">
 import { APIGatewayProxyEventV2, Context } from 'aws-lambda';
 
 export const handle = async (
-    event: APIGatewayProxyEventV2,
-    context: Context
+  event: APIGatewayProxyEventV2,
+  context: Context
 ) => {
-    return {
-        statusCode: 200,
-        body: JSON.stringify({ hello: 'world' })
-    };
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ hello: 'world' })
+  };
 };
                 </code></pre>
                 <p>Although you can get the job done, there are some features I would like to see:</p>
@@ -57,60 +57,60 @@ export const handle = async (
                 </ul>
                 <p>To address some of these points, I've published <a href="https://github.com/lemonJS/serverless-http-utils" target="_blank" rel="nofollow noreferrer">serverless-http-utils</a>.</p>
                 <p>Using these utils, the above handler can be refactored to:</p>
-                <pre><code>
+                <pre><code class="hljs typescript">
 import { handler, Event, HttpSuccess } from 'serverless-http-utils';
 
 export const handle = handler((event: Event) => {
-    return new HttpSuccess(200, { hello: 'world' });
+  return new HttpSuccess(200, { hello: 'world' });
 });
                 </code></pre>
                 <p>I personally find the <code class="inline">HttpSuccess</code> class to be simpler, and adds a solid base for adding utility functions in the future.</p>
                 <p>Under the hood, the handler looks like this:</p>
-                <pre><code>
+                <pre><code class="hljs typescript">
 export const handler = (
-    handle: HandlerFunction
+  handle: HandlerFunction
 ) => async (event: Event) => {
-    return handle(event).catch(error => {
-        return error instanceof HttpException
-            ? error
-            : new HttpException(500, 'Internal Server Error');
-    });
+  return handle(event).catch(error => {
+    return error instanceof HttpException
+      ? error
+      : new HttpException(500, 'Internal Server Error');
+  });
 };              
                 </code></pre>
                 <p>With this handler, we now have the ability to throw exceptions from anywhere with the ability to set a status code and message. Errors that are not an instance of <code class="inline">HttpException</code> will return a 500 status with the matching message, this ensures that we don't dump sensitive information in our JSON response. Errors that are in fact instances of <code class="inline">HttpException</code> will return the status code and message body that were set during the throw.</p>
                 <p><code class="inline">HttpException</code> extends <code class="inline">Error</code> so it's role is twofold. When thrown, it behaves like any other <code class="inline">Error</code>, however it can also be passed around like any other class.</p>
                 <p>In this scenario, the 401 status code will be returned to the client, along with the message:</p>
-                <pre><code>
+                <pre><code class="hljs typescript">
 import { handler, HttpException } from 'serverless-http-utils';
 
 export const handle = handler((event: Event) => {
-    throw new HttpException(401, 'Unauthorized');
+  throw new HttpException(401, 'Unauthorized');
 });             
                 </code></pre>
                 <p>However, a regular error will be safely prevented from reaching the front end:</p>
-                <pre><code>
+                <pre><code class="hljs typescript">
 import { handler } from 'serverless-http-utils';
 
 export const handle = handler((event: Event) => {
-    throw new Error('Yer a wizard, Harry');
+  throw new Error('Yer a wizard, Harry');
 });             
                 </code></pre>
                 <p>You can even create your own custom exceptions that extend <code class="inline">HttpException</code>.
                 </p>
                 <p>I plan to take these utilities and form a framework from them. Although these features are not implemented yet, I can imagine the <code class="inline">HttpSuccess</code> being extended to implement features such as cookie/header setting, for example:</p>
-                <pre><code>
+                <pre><code class="hljs typescript">
 import { handler, Event, HttpSuccess } from 'serverless-http-utils';
 
 export const handle = handler((event: Event) => {
-    const response = new HttpSuccess();
+  const response = new HttpSuccess();
 
-    response.status = 204;
-    response.body = null;
+  response.status = 204;
+  response.body = null;
 
-    response.setHeader('Access-Control-Allow-Origin': '*');
-    response.setCookie('session': 'session-cookie');
+  response.setHeader('Access-Control-Allow-Origin': '*');
+  response.setCookie('session': 'session-cookie');
 
-    return response;
+  return response;
 });             
                 </code></pre>
                 <p>Although similar to Koa or even Express, I imagine the utilities would be lightweight and highly targeted to building REST APIs with Serverless.</p>

@@ -45,52 +45,51 @@
                 <p>The devs on that team absolutely adored testing, and I have a feeling that their enthusiasm and knowledge helped change my perspective as much as the framework did. But I'll focus on the code here.</p>
                 <h3>Highlights</h3>
                 <p>One of my favourite features is the <code class="inline">change { }</code> matcher, it allows you to assert on the side effects that your actions have. To my knowledge, no such thing exists in the JS world. When the subject is called, we can assert that the size of team changed from 4, to 0 but here's an example:
-                <pre><code>
+                <pre><code class="hljs ruby">
 RSpec.describe Mutations::Team, type: :request do
-    let(:team) { create_team(members: 4) }
+  let(:team) { create_team(members: 4) }
 
-    subject { described_class.delete(team) }
+  subject { described_class.delete(team) }
 
-    it 'deletes the team members' do
-        expect { subject }.to change { team.size }.from(4).to(0)
-    end
+  it 'deletes the team members' do
+    expect { subject }.to change { team.size }.from(4).to(0)
+  end
 end
                 </code></pre>
                 <p>Another thing I really like is the mocking and stubbing that is provided out of the box. Jest is quite limited, and can produce some quite clumsy looking code. Sinon is easier to follow, but neither read quite like Rspec. We can easilly mock the <code class="inline">get</code> method on <code class="inline">Net::HTTP</code> so that it returns the expected HTML. We can then assert that the subject reports the presence of the string.</p>
-                <pre><code>
+                <pre><code class="hljs ruby">
 RSpec.describe Mutations::SiteVerify, type: :request do
-    before { allow(Net::HTTP).to receive(:get).and_return('Hello world') }
+  before { allow(Net::HTTP).to receive(:get).and_return('Hello world') }
 
-    subject { described_class.verify('Hello') }
+  subject { described_class.verify('Hello') }
 
-    it 'finds the word in the html response' do
-        expect { subject }.to be true
-    end
+  it 'finds the word in the html response' do
+    expect { subject }.to be true
+  end
 end    
                 </code></pre>
                 <p>One more thing is the magic helpers when working with specific types of tests. For example in controller test, calling the HTTP method magically makes the request, and populates the <code class="inline">response</code> variable:</p>
-                <pre><code>
+                <pre><code class="hljs ruby">
 RSpec.describe PingController, type: :controller do
-    describe 'GET /index' do
-        it 'returns PONG' do
-            get :index
-                expect(response).to have_http_status(200)
-                expect(response.body).to eq 'PONG'
-            end
-        end
+  describe 'GET /index' do
+    it 'returns PONG' do
+      get :index
+      expect(response).to have_http_status(200)
+      expect(response.body).to eq 'PONG'
     end
+  end
 end
                 </code></pre>
                 <p>Lastly, there are <code class="inline">doubles</code> and <code class="inline">instance_doubles</code>. They allow you to use a "stunt double" instead of passing around real data in your unit tests. They are strict, so any calls will raise errors unless they are expected.</p>
-                <pre><code>
+                <pre><code class="hljs ruby">
 Rspec.describe 'Test doubles' do
-    let(:cat) { double('cat') }
+  let(:cat) { double('cat') }
                   
-    before { allow(cat).to receive(:meow).and_return 'MEOW!' }
+  before { allow(cat).to receive(:meow).and_return 'MEOW!' }
                   
-    it 'meows' do
-        expect(cat.meow).to eq 'MEOW!'
-    end
+  it 'meows' do
+    expect(cat.meow).to eq 'MEOW!'
+  end
 end
                 </code></pre>
                 <p>There is an endless amount of stuff to talk about, but safe to say, I've never encounted anything quite like this in the Node.js or Python ecosystems.</p>

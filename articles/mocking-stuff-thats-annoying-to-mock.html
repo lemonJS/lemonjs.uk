@@ -36,87 +36,87 @@
                 <p>I recently attended a workshop where a coworker demoed a Dependency Injection framework he'd written. He pitched it as a way to reduce complexity in their Serverless Python application, and as a way to simplify the unit testing. It got me thinking about how mocking the global scope of some of our dependencies was a huge PITA and that we could leverage some DI.</p>
                 <p>We've recently started moving a leaderboard from DynamoDB to Redis and we need a way to mock some of the calls to Redis. One option would be to use <a href="https://www.npmjs.com/package/ioredis-mock" target="_blank" rel="nofollow noreferrer">ioredis-mock</a>, a drop in library to stub out the entirety of Redis. Yarn installing a whole package just to write some tests seemed like the most javascripty thing ever!</p>
                 <p>Here's how I imagine our code would be structured:</p>
-                <pre><code>
+                <pre><code class="hljs typescript">
 import Redis from 'redis';
 
 const redis = new Redis();
 
 export const getLeaderboardEntry = async (
-    id: string
+  id: string
 ): Promise<string | null> => {
-    return redis.get(id);
+  return redis.get(id);
 };
 
 export const deleteLeaderboardEntry = async (
-    id: string
+  id: string
 ): Promise<void> => {
-    await redis.del(id);
+  await redis.del(id);
 };
                 </code></pre>
                 <p>A bunch of exported functions all utlising the global redis instance. On the face of it, this code is okay, however it has it's downsides. Firstly, getting an item from the leaderboard is now tightly coupled both to Redis, and to the specific npm package for talking to Redis. Secondly, we need to mock the global scope.</p>
                 <p>Without going head first into a DI framework, we could easilly rewrite this code as a class, where we take a CacheClient argument, like so:</p>
-                <pre><code>
+                <pre><code class="hljs typescript">
 export class Leaderboard {
-    private readonly client: CacheClient;
+  private readonly client: CacheClient;
 
-    public constructor(client: CacheClient) {
-        this.client = client;
-    }
+  public constructor(client: CacheClient) {
+    this.client = client;
+  }
 
-    public async get(id: string): Promise<string | null> {
-        this.client.get(id);
-    }
+  public async get(id: string): Promise<string | null> {
+    this.client.get(id);
+  }
 
-    public async delete(id: string): Promise<void> {
-        this.client.del(id);
-    }
+  public async delete(id: string): Promise<void> {
+    this.client.del(id);
+  }
 }
                 </code></pre>
                 <p>With a small change, we've decoupled the leaderboard from Redis, from ioredis, and made it possible to test without mocking the global scope, nice! A simple test can now be written to make sure the client is called correctly:</p>
-                <pre><code>
+                <pre><code class="hljs typescript">
 describe('Leaderboard', () => {
-    describe('.get', () => {
-        const client = { get: jest.fn(() => 'hello!') };
+  describe('.get', () => {
+    const client = { get: jest.fn(() => 'hello!') };
 
-        it('calls the client', async () => {
-            const leaderboard = new Leaderboard(client);
-            await leaderboard.get('id');
-            expect(client.get).toHaveBeenCalledWith('id');
-        });
-
-        it('returns the key', async () => {
-            const leaderboard = new Leaderboard(client);
-            const result = await leaderboard.get('id');
-            expect(result).toEqual('hello');
-        });
+    it('calls the client', async () => {
+      const leaderboard = new Leaderboard(client);
+      await leaderboard.get('id');
+      expect(client.get).toHaveBeenCalledWith('id');
     });
+
+    it('returns the key', async () => {
+      const leaderboard = new Leaderboard(client);
+      const result = await leaderboard.get('id');
+      expect(result).toEqual('hello');
+    });
+  });
 });
                 </code></pre>
                 <p>Another option would be to use a Higher Order Function to inject the <code class="inline">CacheClient</code>, we could leverage all the benefits of the above class, but retain the 'just a bunch of exported functions' approach. Here's a basic wrapper:</p>
-                <pre><code>i
-mport Redis from 'ioredis';
+                <pre><code class="hljs typescript">
+import Redis from 'ioredis';
 
 const redis = new Redis();
 
 const withCacheClient = <T extends Function, G>(
-    func: T,
-    ...args: Array<T>
+  func: T,
+  ...args: Array<T>
 ) => func(x, ...args);
                 </code></pre>
                 <p>If we modify the code from the first example to use this HOF, it would look like this:</p>
-                <pre><code>
+                <pre><code class="hljs typescript">
 export const getLeaderboardEntry = async (
-    client: CacheClient,
-    id: string
+  client: CacheClient,
+  id: string
 ): Promise<string | null> => {
-    return client.get(id);
+  return client.get(id);
 };
 
 export const deleteLeaderboardEntry = async (
-    client: CacheClient,
-    id: string
+  client: CacheClient,
+  id: string
 ): Promise<void> => {
-    await client.del(id);
+  await client.del(id);
 };
 
 // Example usage
@@ -124,14 +124,14 @@ async withCacheClient(getLeaderboardEntry, 'id');
 async withCacheClient(deleteLeaderboardEntry, 'id');
                 </code></pre>
                 <p>Once again, our application logic can be tested without the need to mock the global Redis instance, as we can pass a mocked version in ourselves:</p>
-                <pre><code>
+                <pre><code class="hljs typescript">
 describe('getLeaderboardEntry', () => {
-    const client = { get: jest.fn(() => 'Hello') };
+  const client = { get: jest.fn(() => 'Hello') };
 
-    it('returns the key', () => {
-        const result = getLeaderboardEntry(redis, 'id');
-        expect(result).toEqual('hello');
-    });
+  it('returns the key', () => {
+    const result = getLeaderboardEntry(redis, 'id');
+    expect(result).toEqual('hello');
+  });
 });
             </code></pre>
             </article>

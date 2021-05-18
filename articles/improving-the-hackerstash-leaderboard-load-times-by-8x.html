@@ -44,35 +44,35 @@
                 <p>This approach was a total hack and was not scalable. I was already seeing 1000ms response times with only ~30 projects on the leaderboard which is far too slow.</p>
                 <p>After some research I decided on a Redis SortedSet as it seemed to fit the bill. I created a new class to handle the leaderboard that would be used for fetching the order of projects, as well as updating the project's score.</p>
                 <p>The class looks a little something like this (simplified for your viewing pleaseure, of course):</p>
-                <pre><code>
+                <pre><code class="hljs python">
 class Leaderboard:
-    key: str = key()
+  key: str = key()
 
-    def __init__(self, project):
-        self.project = project
+  def __init__(self, project):
+    self.project = project
 
-    @classmethod    
-    def order(cls, reverse=False) -> list[int]:
-        order = redis.zrevrange(cls.key, 0, -1)
-        return [int(x.decode('utf-8')) for x in order]
+  @classmethod    
+  def order(cls, reverse=False) -> list[int]:
+    order = redis.zrevrange(cls.key, 0, -1)
+    return [int(x.decode('utf-8')) for x in order]
 
-    @classmethod    
-    def remaining_days(cls) -> str:
-        return arrow.utcnow().ceil('month').humanize(only_distance=True)
+  @classmethod    
+  def remaining_days(cls) -> str:
+    return arrow.utcnow().ceil('month').humanize(only_distance=True)
 
-    @property    
-    def position(self) -> int:
-        rank = redis.zrevrank(self.key, self.project.id)
-        return rank + 1 if rank is not None else -1
+  @property    
+  def position(self) -> int:
+    rank = redis.zrevrank(self.key, self.project.id)
+    return rank + 1 if rank is not None else -1
 
-    @property    
-    def score(self) -> int:
-        score = redis.zscore(self.key, self.project.id) or 0.0
-        return int(score)
+  @property    
+  def score(self) -> int:
+    score = redis.zscore(self.key, self.project.id) or 0.0
+    return int(score)
 
-    def update(self, amount: int) -> int:
-        score = redis.zincrby(self.key, amount, self.project.id)
-        return int(score)
+  def update(self, amount: int) -> int:
+    score = redis.zincrby(self.key, amount, self.project.id)
+    return int(score)
                 </code></pre>
                 <p>Let's break this down!</p>
                 <p><code class="inline">Leaderboard#order</code></p>
@@ -85,15 +85,15 @@ class Leaderboard:
                 <p>This uses the Redis ZSCORE method to get the current score for the project. It returns the score as a Float if it exists, or None if not. I cast to an Int as it would look a bit weird otherwise.</p>
                 <p><code class="inline">Leaderboard#update</code></p>
                 <p>This uses the Redis ZINCRBY method to increment the projects score. I call this whenever an action occurs like a vote, a simplified example looks like this:</p>
-                <pre><code>
+                <pre><code class="hljs python">
 def vote(self, direction: str) -> None:
-    score = 5 if direction == 'up' else -5
-    vote = Vote(type='post', score=score)
-    Leaderboard(self.project).update(score)    
-    db.session.commit()
+  score = 5 if direction == 'up' else -5
+  vote = Vote(type='post', score=score)
+  Leaderboard(self.project).update(score)    
+  db.session.commit()
                 </code></pre>
                 <p>When fetching the leaderboard, I can first get the order and use it to work out which projects to fetch from the database, like so:</p>
-                <pre><code>
+                <pre><code class="hljs python">
 # Fetch the page from the query string, default to the first page
 page = request.args.get('page', 1, type=int)
 
@@ -106,10 +106,10 @@ order_expr = func.array_position(order, Project.id)
 # Get only the projects that qualify for the leaderboard, and order
 # them based on the order expression
 projects = Project.query\
-    .filter(Project.id.in_(order))\
-    .filter(Project.published == True)\
-    .order_by(order_expr)\
-    .paginate(page, 25, False)
+  .filter(Project.id.in_(order))\
+  .filter(Project.published == True)\
+  .order_by(order_expr)\
+  .paginate(page, 25, False)
                 </code></pre>
                 <p>Overall, some nice gains in performance and we're left with a more future proof solution</p>
                 <p>I wrote about this over at <a href="https://hackerstash.com/posts/how-we-improved-the-leaderboard-load-times-by-8x" target="_blank" rel="noreferrer nofollow">HackerStash</a>, you can check the speed gains out for yourself</p>
