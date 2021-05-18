@@ -106,11 +106,11 @@ pre, code {
 }
 
 article pre {
-  background: #353b48;
+  background: #282c34;
   border-radius: .25rem;
   margin: 0 0 2rem 0;
   overflow-y: auto;
-  padding: .5rem 2rem;
+  padding: 0 1rem;
 }
 
 article code {
@@ -118,7 +118,7 @@ article code {
 }
 
 article code.inline {
-  background: #353b48;
+  background: #282c34;
   border-radius: .25rem;
   color: #c678dd;
   line-height: 20px;
