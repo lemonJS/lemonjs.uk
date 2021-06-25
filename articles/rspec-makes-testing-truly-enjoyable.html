@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>lemonjs / articles / Mocking stuff that's annoying to mock</title>
+    <title>lemonjs / articles / RSpec makes testing truly enjoyable</title>
     <meta charset="utf-8">
     <meta name="description" content="Just another developer's blog">
     <meta name="keywords" content="Blog, TypeScript, Python, Running, Coffee">
@@ -10,7 +10,7 @@
     <meta name="author" content="Lewis Monteith">
     <meta property="og:title" content="RSpec makes testing truly enjoyable">
     <meta property="og:description" content="My first experience writing tests was with Mocha and Chai in Node v0.10. At the time there were two phrases that every non-dev in the company was using, the first was 'mobile first' and the second was 'TDD'. I'm not sure they really understood what they were, but it was all the rage and they wanted it.">
-    <meta property="og:url" content="https://lemonjs.uk/mocking-stuff-thats-annoying-to-mock.html">
+    <meta property="og:url" content="https://lemonjs.uk/rspec-makes-testing-truly-enjoyable.html">
     <meta property="og:image" content="https://lemonjs.uk/images/social-bg.png">
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -47,7 +47,7 @@
                 <p>How much of this enjoyment comes from RSpec directly, and how much of it is due to Rails or Ruby is not that clear to me, but I suspect it's a combination of the three. Finally, tests were seperated logically, and read like they were telling a story.</p>
                 <p>The devs on that team absolutely adored testing, and I have a feeling that their enthusiasm and knowledge helped change my perspective as much as the framework did. But I'll focus on the code here.</p>
                 <h3>Highlights</h3>
-                <p>One of my favourite features is the <code class="inline">change { }</code> matcher, it allows you to assert on the side effects that your actions have. To my knowledge, no such thing exists in the JS world. When the subject is called, we can assert that the size of team changed from 4, to 0 but here's an example:
+                <p>One of my favourite features is the <code class="inline">change { }</code> matcher, it allows you to assert on the side effects that your actions have. To my knowledge, no such thing exists in the JS world. When the subject is called, we can assert that the size of team changed from 4, to 0 but here's an example:</p>
                 <pre><code class="hljs ruby">
 RSpec.describe Mutations::Team, type: :request do
   let(:team) { create_team(members: 4) }

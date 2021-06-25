@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>lemonjs / articles / Understanding generics in TypeScript</title>
+    <meta charset="utf-8">
+    <meta name="description" content="Just another developer's blog">
+    <meta name="keywords" content="Blog, TypeScript, Python, Running, Coffee">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Lewis Monteith">
+    <meta property="og:title" content="Understanding generics in TypeScript">
+    <meta property="og:description" content="Generics are absolutely not specific to TypeScript, however it is where I first encountered them, and where I expect many others will also.">
+    <meta property="og:url" content="https://lemonjs.uk/articles/understanding-generics-in-typescript.html">
+    <meta property="og:image" content="https://lemonjs.uk/images/social-bg.png">
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="lemonjs">
+    <meta name="theme-color" content="#2f3640">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/atom-one-dark.css">
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h3>lemonjs</h3>
+            <a href="/">< Back</a>
+        </header>
+        <main>
+            <article>
+                <h1>Understanding generics in TypeScript</h1>
+                <div class="tags">
+                  <span>TypeScript</span>
+                </div>
+                <p>Generics are absolutely not specific to TypeScript, however it is where I first encountered them, and where I expect many others will also.</p>
+                <p>Usually types are defined when they are declared, however generics allow the code to figure out the type as and when needed. This allows for sections of code to be reused by multiple data types, and to support future code without needing to modify rigid types. Ultimately, they allow you to write more flexible code.</p>
+                <p>Generics to me eventually "clicked". I had a similar experience with Redux in the past, it made absolutely no sense, until it suddently did!</p>
+                <p>Defining input and output types on a functions looks like this:</p>
+                <pre><code class="hljs typescript">
+function say(value: string): string {
+  return hello;
+}
+                </code></pre>
+                <p>This works fine for strings, but does not work for other data types. In order to make this function more flexible, we can use generics:</p>
+                <pre><code class="hljs typescript">
+function say&lt;T&gt;(value: T): T {
+  return value;
+} 
+                </code></pre>
+                <p>Instead of specifying the value as a <code class="inline">string</code>, the value is of type <code class="inline">T</code>, which means we can call it with anthing we like:</p>
+                <pre><code class="hljs typescript">
+say('Hello'); // 'Hello'
+say(5); // 5
+say({ hello: 'world' }); // { hello: 'world' }
+                </code></pre>
+                <p>In the above code, the type is inferred by the compiler, however can specify the type ourselves:</p>
+                <pre><code class="hljs typescript">
+say&lt;string&gt;('Hello'); // string
+say&lt;number&gt;(5); // number
+say&lt;{ [key: string]: string }&gt;({ hello: 'world' }); // { [key: string]: string }
+                </code></pre>
+                <p>You can use generics to prevent <code class="inline">any</code> types, as well as explicit casting of types. <code class="inline">JSON.parse</code> for example accepts a generic type, as the compiler can't possibly expect what your API will return. Some caution needs to be taken as we are asserting types on unknown data. If you want to be 100% sure, you should validate the body first using something like JSON schema. However, for simplicities sake, you can do this:</p>
+                <pre><code class="hljs typescript">
+type User = {
+  id: number;
+  firstName: string;
+}
+
+const response = await fetch('/api/user');
+const body = JSON.parse&lt;User&gt;(await response.json());
+                </code></pre>
+                <p>Thanks to the generic nature of <code class="inline">JSON.parse</code>, <code class="inline">body</code> is now of type <code class="inline">User</code>, rather than the default value of <code class="inline">any</code>.</p>
+                <p>To illustrate how generics can make code more flexible, and to prevent uneccessary changes in the future, we can build a simple array merging function. The function should take any two arrays, of any different type, and retain the type safety after merging. Simply accepting <code class="inline">any</code> and returning <code class="inline">any</code> is not acceptable, and using fixed types or <code class="inline">union</code> types will make the function too rigid.</p>
+                <p>Starting with some data, imagine there are two different arrays, one of them contains items of type <code class="inline">Foo</code>, and the other contains items of type <code class="inline">Bar</code>:</p>
+                <pre><code class="hljs typescript">
+type Foo = {
+  id: number;
+}
+
+type Bar = {
+  id: string;
+}
+
+const myFooArr: Foo[] = [{ id: 1 }];
+const myBarArr: Bar[] = [{ id: '1' }];
+                </code></pre>
+                <p>The function must take the two arrays of any type, and return the union of the two types. Here it is:</p>
+                <pre><code class="hljs typescript">
+function mergeArrays&lt;A, B&gt;(arr1: A[], arr2: B[]): (A | B)[] {
+  return [...arr1, ...arr2];
+}
+                </code></pre>
+                <p>As expected, the <code class="inline">mergeArrays</code> function accepts both arrays happily, and returns the union:</p>
+                <pre><code class="hljs typescript">
+const combinedArr = mergeArrays(myFooArr, myBarArr); // (Bar | Foo)[]
+                </code></pre>
+                <p>And to highlight the flexiblity, we can even pass in a bunch of random data and the compiler will automatically detect and return the correct union response:</p>
+                <pre><code class="hljs typescript">
+const otherCombinedArr = mergeArrays([1, 2, 3], ['a', 'b', 'c']); // (string | number)[]
+                </code></pre>
+                <p>Of course, generics can allow you to do far more than this, and they can get pretty wild. But the simple examples show that generics aren't as scary as people expect.</p>
+            </article>
+        </main>
+    </div>
+
+    <script type="text/javascript" src="/js/highlight.pack.js"></script>
+    <script type="text/javascript">hljs.highlightAll();</script>
+</body>
+
+</html>
