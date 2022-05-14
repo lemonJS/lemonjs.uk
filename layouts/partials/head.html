@@ -18,4 +18,15 @@
   {{ printf `<link rel="stylesheet" href="%s">` $css.RelPermalink | safeHTML }}
 
   <title>{{ .Title }}</title>
+
+  <!-- Squeaky Tracking Code for https://lemonjs.uk -->
+  <script>
+    (function(s,q,e,a,u,k,y){
+      s._sqSettings={site_id:'ab72152a-c9dd-4e63-9bf3-545d7502cbdb'};
+      u=q.getElementsByTagName('head')[0];
+      k=q.createElement('script');
+      k.src=e+s._sqSettings.site_id;
+      u.appendChild(k);
+    })(window,document,'https://cdn.squeaky.ai/g/0.4.0/script.js?');
+  </script>
 </head>
