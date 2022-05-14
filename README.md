@@ -1,3 +1,1 @@
-# lemonjs.uk
-
-Static personal site
+# lemonJS Blog

@@ -1,0 +1,4 @@
+<li>
+  <p><time>{{ .Date | time.Format (i18n "posts.date") }}</time></p>
+  <a href="{{ .Permalink }}">{{ .Title }}</a>
+</li>

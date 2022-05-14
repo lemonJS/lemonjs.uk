@@ -38,7 +38,7 @@ a:hover {
   color: #e1b12c;
 }
 
-.container {
+.wrapper {
   margin: 0 auto;
   max-width: 720px;
   padding: 0 2rem;
@@ -49,22 +49,8 @@ a:hover {
 }
 
 .header a,
-.header h3 {
+.header h2 {
   margin: 0 0 1rem 0;
-}
-
-.tags {
-  font-size: 14px;
-  margin-top: .5rem;
-}
-
-.tags span {
-  background: #282c34;
-  border-radius: .25rem;
-  color: #c678dd;
-  display: inline-block;
-  margin-right: .5rem;
-  padding: .25rem;
 }
 
 .articles {
@@ -93,8 +79,12 @@ a:hover {
   margin: 0;
 }
 
+.post-header {
+  margin: 0 0 3rem 0;
+}
+
 article h1 {
-  margin-bottom: 1rem;
+  margin-bottom: .5rem;
 }
 
 article a {
@@ -117,32 +107,15 @@ article li {
   line-height: 24px;
 }
 
-pre, code {
-  font-family: inherit;
-  font-size: 16px;
-  line-height: 24px;
+article figure {
+  margin: 0;
 }
 
-article pre {
-  background: #282c34;
-  border-radius: .25rem;
-  margin: 0 0 2rem 0;
-  overflow-y: auto;
-  padding: 0 1rem;
+article figcaption {
+  padding: .5rem 1rem;
+  text-align: center;
 }
 
-article code {
-  white-space: pre;
-}
-
-article code.inline {
-  background: #282c34;
-  border-radius: .25rem;
-  color: #c678dd;
-  line-height: 20px;
-  padding: .15rem .25rem;
-}
-
-article .tags {
-  margin-bottom: 2rem;
+article img {
+  width: 100%;
 }
