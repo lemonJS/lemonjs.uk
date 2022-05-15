@@ -1,5 +1,5 @@
 <ul class="articles">
 {{- range where site.RegularPages "Type" "in" site.Params.mainSections }}
-    {{ .Render "li" }}
+  {{ .Render "li" }}
 {{- end }}
 </ul>

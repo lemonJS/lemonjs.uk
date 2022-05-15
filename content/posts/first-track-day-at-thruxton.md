@@ -1,7 +1,10 @@
 ---
 title: "First Track Day at Thruxton"
 date: 2022-05-14T20:13:26+01:00
-draft: true
+draft: false
+tags:
+  - Cars
+  - Track
 ---
 
 ## A background on the cars
